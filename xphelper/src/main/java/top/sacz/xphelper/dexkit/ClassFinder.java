@@ -1,6 +1,8 @@
 package top.sacz.xphelper.dexkit;
 
 
+import static top.sacz.xphelper.XpHelper.classLoader;
+
 import org.jetbrains.annotations.NotNull;
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.enums.MatchType;
@@ -12,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import top.sacz.xphelper.base.BaseDexQuery;
 import top.sacz.xphelper.dexkit.cache.DexKitCache;
@@ -164,13 +167,17 @@ public class ClassFinder extends BaseDexQuery {
 
     public Class<?> firstOrNull() {
         List<Class<?>> list = find();
-        return list.isEmpty() ? null : list.get(0);
+        try {
+            return list.isEmpty() ? null : Objects.requireNonNull(DexFinder.getDexKitBridge().findClass(FindClass.create().matcher(buildClassMatcher())).singleOrNull()).getInstance(classLoader);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Class<?> first() throws ClassNotFoundException {
         List<Class<?>> list = find();
         if (list.isEmpty()) throw new ClassNotFoundException("Class not found: " + this);
-        return list.get(0);
+        return DexFinder.getDexKitBridge().findClass(FindClass.create().matcher(buildClassMatcher())).single().getInstance(classLoader);
     }
 
     @NotNull

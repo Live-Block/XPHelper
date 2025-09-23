@@ -1,5 +1,7 @@
 package top.sacz.xphelper.dexkit;
 
+import static top.sacz.xphelper.XpHelper.classLoader;
+
 import org.jetbrains.annotations.NotNull;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.MatchType;
@@ -12,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import top.sacz.xphelper.base.BaseDexQuery;
 import top.sacz.xphelper.dexkit.cache.DexKitCache;
@@ -331,23 +334,27 @@ public class MethodFinder extends BaseDexQuery {
     /**
      * 查找方法 返回第一个方法 如果不存在则返回null
      */
-    public Method firstOrNull() {
+    public Method singleOrNull() {
         List<Method> methods = find();
         if (methods.isEmpty()) {
             return null;
         }
-        return methods.get(0);
+        try {
+            return Objects.requireNonNull(DexFinder.getDexKitBridge().findMethod(FindMethod.create().matcher(buildMethodMatcher())).singleOrNull()).toDexMethod().getMethodInstance(classLoader);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * 查找方法 返回第一个方法 如果不存在则抛出异常
      */
-    public Method first() throws Exception {
+    public Method single() throws Exception {
         List<Method> methods = find();
         if (methods.isEmpty()) {
             throw new NoSuchMethodException("No method found :" + this);
         }
-        return methods.get(0);
+        return DexFinder.getDexKitBridge().findMethod(FindMethod.create().matcher(buildMethodMatcher())).single().toDexMethod().getMethodInstance(classLoader);
     }
 
 

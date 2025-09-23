@@ -1,5 +1,7 @@
 package top.sacz.xphelper.dexkit;
 
+import static top.sacz.xphelper.XpHelper.classLoader;
+
 import androidx.annotation.NonNull;
 
 import org.luckypray.dexkit.query.FindField;
@@ -14,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import top.sacz.xphelper.base.BaseDexQuery;
 import top.sacz.xphelper.dexkit.cache.DexKitCache;
@@ -233,9 +236,13 @@ public class FieldFinder extends BaseDexQuery {
      *
      * @return 第一个找到的字段或null
      */
-    public Field firstOrNull() {
+    public Field singleOrNull() {
         List<Field> list = find();
-        return list.isEmpty() ? null : list.get(0);
+        try {
+            return list.isEmpty() ? null : Objects.requireNonNull(DexFinder.getDexKitBridge().findField(FindField.create().matcher(buildFieldMatcher())).singleOrNull()).toDexField().getFieldInstance(classLoader);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -244,10 +251,10 @@ public class FieldFinder extends BaseDexQuery {
      * @return 第一个找到的字段
      * @throws NoSuchFieldException 如果没有找到字段
      */
-    public Field first() throws NoSuchFieldException {
+    public Field single() throws NoSuchFieldException {
         List<Field> list = find();
         if (list.isEmpty()) throw new NoSuchFieldException("Field not found: " + this);
-        return list.get(0);
+        return DexFinder.getDexKitBridge().findField(FindField.create().matcher(buildFieldMatcher())).single().toDexField().getFieldInstance(classLoader);
     }
 
     @NonNull
