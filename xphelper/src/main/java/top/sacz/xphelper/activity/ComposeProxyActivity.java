@@ -9,8 +9,6 @@ import android.view.WindowManager;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 
 import top.sacz.xphelper.XpHelper;
 import top.sacz.xphelper.reflect.ClassUtils;
@@ -19,8 +17,8 @@ import top.sacz.xphelper.reflect.ClassUtils;
 /**
  * 使用前参阅 {@link ActivityProxyManager#initActivityProxyManager(Context)}
  */
-public class BaseActivity extends AppCompatActivity {
-    private final BaseActivityClassLoader mLoader = new BaseActivityClassLoader(BaseActivity.class.getClassLoader());
+public class ComposeProxyActivity extends ComponentActivity {
+    private final BaseActivityClassLoader mLoader = new BaseActivityClassLoader(ComposeProxyActivity.class.getClassLoader());
 
     @Override
     public ClassLoader getClassLoader() {
